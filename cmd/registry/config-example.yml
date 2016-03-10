@@ -5,7 +5,7 @@ log:
 storage:
   cache:
     blobdescriptor: inmemory
-  filesystem:
+  auto:
     rootdirectory: /var/lib/registry
 http:
   addr: :5000
