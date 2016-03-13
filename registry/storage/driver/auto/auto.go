@@ -12,6 +12,8 @@ import (
 	"github.com/docker/distribution/registry/storage/driver/base"
 	"github.com/docker/distribution/registry/storage/driver/factory"
 	"bytes"
+	"fmt"
+	"strconv"
 )
 
 const driverName = "auto"
@@ -29,6 +31,7 @@ const listMax = 1000
 
 
 func init() {
+	fmt.Println("-----------auto  init---------------")
 	factory.Register(driverName, &autoDriverFactory{})
 }
 
@@ -103,13 +106,19 @@ func (d *driver) PutContent(ctx context.Context, path string, contents []byte) e
 	if _, err := d.WriteStream(ctx, path, 0, bytes.NewReader(contents)); err != nil {
 		return err
 	}
-	return
+	return nil
 }
 
 // ReadStream retrieves an io.ReadCloser for the content stored at "path" with a
 // given byte offset.
 func (d *driver) ReadStream(ctx context.Context, path string, offset int64) (io.ReadCloser, error) {
 	fdfs := NewFdfs(path,offset);
+	//判断offset是否超出范围
+	c,err := fdfs.Checkoffset();
+	if err!=nil || !c {
+		fmt.Println("------->"+path+" offset="+strconv.FormatInt(offset,10)+"  offset wrong")
+		return nil,err
+	}
 	return fdfs,nil
 }
 
@@ -128,33 +137,33 @@ func (d *driver) WriteStream(ctx context.Context, path string, offset int64, rea
 // Stat retrieves the FileInfo for the given path, including the current size
 // in bytes and the creation time.
 func (d *driver) Stat(ctx context.Context, path string) (storagedriver.FileInfo, error) {
-	fdfs := NewFdfs(path,0);
+	fdfs := NewFdfs(path,int64(0));
 	return fdfs.Stat();
 }
 
 // List returns a list of the objects that are direct descendants of the given path.
 func (d *driver) List(ctx context.Context, opath string) ([]string, error) {
-	fdfs := NewFdfs(opath,0);
+	fdfs := NewFdfs(opath,int64(0));
 	return fdfs.List();
 }
 
 // Move moves an object stored at sourcePath to destPath, removing the original
 // object.
 func (d *driver) Move(ctx context.Context, sourcePath string, destPath string) error {
-	fdfs := NewFdfs(sourcePath,0);
+	fdfs := NewFdfs(sourcePath,int64(0));
 	return fdfs.Move(destPath);
 }
 
 // Delete recursively deletes all objects stored at "path" and its subpaths.
 func (d *driver) Delete(ctx context.Context, path string) error {
-	fdfs := NewFdfs(path,0);
+	fdfs := NewFdfs(path,int64(0));
 	return fdfs.Delete();
 }
 
 // URLFor returns a URL which may be used to retrieve the content stored at the given path.
 // May return an UnsupportedMethodErr in certain StorageDriver implementations.
 func (d *driver) URLFor(ctx context.Context, path string, options map[string]interface{}) (string, error) {
-	return
+	return "",nil
 }
 
 

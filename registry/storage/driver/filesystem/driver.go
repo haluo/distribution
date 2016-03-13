@@ -13,12 +13,14 @@ import (
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	"github.com/docker/distribution/registry/storage/driver/base"
 	"github.com/docker/distribution/registry/storage/driver/factory"
+	"strconv"
 )
 
 const driverName = "filesystem"
 const defaultRootDirectory = "/var/lib/registry"
 
 func init() {
+	fmt.Println("-----------f  init---------------")
 	factory.Register(driverName, &filesystemDriverFactory{})
 }
 
@@ -104,6 +106,7 @@ func (d *driver) PutContent(ctx context.Context, subPath string, contents []byte
 // ReadStream retrieves an io.ReadCloser for the content stored at "path" with a
 // given byte offset.
 func (d *driver) ReadStream(ctx context.Context, path string, offset int64) (io.ReadCloser, error) {
+	fmt.Println("----ReadStream---path="+path)
 	file, err := os.OpenFile(d.fullPath(path), os.O_RDONLY, 0644)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -128,6 +131,7 @@ func (d *driver) ReadStream(ctx context.Context, path string, offset int64) (io.
 // WriteStream stores the contents of the provided io.Reader at a location
 // designated by the given path.
 func (d *driver) WriteStream(ctx context.Context, subPath string, offset int64, reader io.Reader) (nn int64, err error) {
+	fmt.Println("----WriteStream---path="+subPath)
 	// TODO(stevvooe): This needs to be a requirement.
 	// if !path.IsAbs(subPath) {
 	// 	return fmt.Errorf("absolute path required: %q", subPath)
@@ -169,12 +173,13 @@ func (d *driver) Stat(ctx context.Context, subPath string) (storagedriver.FileIn
 	fi, err := os.Stat(fullPath)
 	if err != nil {
 		if os.IsNotExist(err) {
+			fmt.Println("----Stat---path="+subPath +"  not found")
 			return nil, storagedriver.PathNotFoundError{Path: subPath}
 		}
-
+		fmt.Println("----Stat---path="+subPath +"  err")
 		return nil, err
 	}
-
+	fmt.Println("----Stat---path="+subPath +"_"+strconv.FormatBool(fi.IsDir()))
 	return fileInfo{
 		path:     subPath,
 		FileInfo: fi,
@@ -184,6 +189,7 @@ func (d *driver) Stat(ctx context.Context, subPath string) (storagedriver.FileIn
 // List returns a list of the objects that are direct descendants of the given
 // path.
 func (d *driver) List(ctx context.Context, subPath string) ([]string, error) {
+	fmt.Println("----List---path="+subPath)
 	fullPath := d.fullPath(subPath)
 
 	dir, err := os.Open(fullPath)
@@ -205,13 +211,16 @@ func (d *driver) List(ctx context.Context, subPath string) ([]string, error) {
 	for _, fileName := range fileNames {
 		keys = append(keys, path.Join(subPath, fileName))
 	}
-
+	for _,s := range keys {
+		fmt.Println("----List---path="+subPath+"_"+s);
+	}
 	return keys, nil
 }
 
 // Move moves an object stored at sourcePath to destPath, removing the original
 // object.
 func (d *driver) Move(ctx context.Context, sourcePath string, destPath string) error {
+	fmt.Println("----Move---spath="+sourcePath+"  destPath="+destPath)
 	source := d.fullPath(sourcePath)
 	dest := d.fullPath(destPath)
 
@@ -229,6 +238,7 @@ func (d *driver) Move(ctx context.Context, sourcePath string, destPath string) e
 
 // Delete recursively deletes all objects stored at "path" and its subpaths.
 func (d *driver) Delete(ctx context.Context, subPath string) error {
+	fmt.Println("----Delete---path="+subPath)
 	fullPath := d.fullPath(subPath)
 
 	_, err := os.Stat(fullPath)
