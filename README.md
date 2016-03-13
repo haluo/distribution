@@ -1,10 +1,18 @@
 # Distribution
 
+```
 新增fastdfs的 StorageDriver  使docker镜像可以存储到可靠的fastdfs文件系统上.
 
 需要配合 https://github.com/haluo/docker-registry-fdfs 使用
 
 docker-registry-fdfs 是java版fastdfs http接口
+
+```
+
+
+
+
+
 
 
 
