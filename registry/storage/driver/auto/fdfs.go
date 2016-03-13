@@ -67,7 +67,7 @@ func (h *Fdfshandle) Read(p []byte) (n int, err error){
 	resut := res[1];
 	//fmt.Println("rstream--path="+h.path+"&offset="+strconv.FormatInt(h.offset,10)+"&n="+strconv.Itoa(len(p))+"-->"+string(body))
 	if code==0 {
-		uDec, _ :=base64.StdEncoding.DecodeString(resut)
+		uDec, _ :=base64.URLEncoding.DecodeString(resut)
 		//p = append(uDec,p[len(uDec):]...);
 		//n = len(uDec)
 		n = copy(p,uDec)
@@ -179,7 +179,7 @@ func (h *Fdfshandle)Write(reader io.Reader) (nn int64, err error){
 		nr, er := reader.Read(buf)
 		if nr > 0 {
 			//nw, ew := dst.Write(buf[0:nr])
-			bstr := base64.StdEncoding.EncodeToString(buf[0:nr]);
+			bstr := base64.URLEncoding.EncodeToString(buf[0:nr]);
 			url := DK_FDFS_URL+"/wstream?path="+h.path+"&offset="+strconv.FormatInt(offset,10)+"&bstr="+bstr
 			fmt.Println(url);
 			resp, eg :=http.Get(url)
@@ -199,6 +199,8 @@ func (h *Fdfshandle)Write(reader io.Reader) (nn int64, err error){
 			if nw > 0 {
 				nn += int64(nw)
 				offset+=int64(nw)
+				fmt.Println(h.path+"======================>"+strconv.FormatInt(nn,10)+"   nr="+strconv.Itoa(nr));
+
 			}
 			if nr != nw {
 				err = io.ErrShortWrite
