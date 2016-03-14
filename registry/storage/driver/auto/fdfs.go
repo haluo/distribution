@@ -12,6 +12,7 @@ import (
 	"time"
 	"strconv"
 	"strings"
+	"net/url"
 )
 
 const DK_FDFS_URL string = "http://dk.rg.autohome.com.cn"
@@ -171,18 +172,27 @@ func (h *Fdfshandle) Close() error{
 //将io.Reader 写入远程fastdfs
 func (h *Fdfshandle)Write(reader io.Reader) (nn int64, err error){
 	//将 reder内容写入 远程 fastdfs
-	buf := make([]byte, 32*1024);
+	buf := make([]byte, 60*1024);
 	offset := h.offset;
 	for {
 
 		//每次读取nr条数据 写入远程
 		nr, er := reader.Read(buf)
 		if nr > 0 {
-			//nw, ew := dst.Write(buf[0:nr])
 			bstr := base64.URLEncoding.EncodeToString(buf[0:nr]);
-			url := DK_FDFS_URL+"/wstream?path="+h.path+"&offset="+strconv.FormatInt(offset,10)+"&bstr="+bstr
+			//url := DK_FDFS_URL+"/wstream?path="+h.path+"&offset="+strconv.FormatInt(offset,10)+"&bstr="+bstr
 			//fmt.Println(url);
-			resp, eg :=http.Get(url)
+			//resp, eg :=http.Get(url)
+
+			v := url.Values{}
+			v.Set("path", h.path)
+			v.Set("offset", strconv.FormatInt(offset,10))
+			v.Set("bstr", bstr)
+			fbody := ioutil.NopCloser(strings.NewReader(v.Encode())) //把form数据编下码
+			client := &http.Client{}
+			req, _ := http.NewRequest("POST", DK_FDFS_URL+"/wstream", fbody)
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
+			resp, eg := client.Do(req) //发送
 			if eg != nil {
 				err = eg
 				break
@@ -195,11 +205,10 @@ func (h *Fdfshandle)Write(reader io.Reader) (nn int64, err error){
 			}
 
 			nw,_:= strconv.Atoi(string(body));
-
+			//fmt.Println(h.path+"======================>nw="+strconv.Itoa(nw)+"   nr="+strconv.Itoa(nr));
 			if nw > 0 {
 				nn += int64(nw)
 				offset+=int64(nw)
-				//fmt.Println(h.path+"======================>"+strconv.FormatInt(nn,10)+"   nr="+strconv.Itoa(nr));
 
 			}
 			if nr != nw {
