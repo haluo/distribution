@@ -47,7 +47,7 @@ func (h *Fdfshandle) Read(p []byte) (n int, err error){
 		isEnd = true;
 	}
 	url := DK_FDFS_URL+"/rstream?path="+h.path+"&offset="+strconv.FormatInt(h.offset,10)+"&n="+strconv.Itoa(fdfsn)
-	fmt.Println(url);
+	//fmt.Println(url);
 	resp, err :=http.Get(url)
 	if(err != nil){
 		fmt.Println("Hdfshandle Read http get err")
@@ -181,7 +181,7 @@ func (h *Fdfshandle)Write(reader io.Reader) (nn int64, err error){
 			//nw, ew := dst.Write(buf[0:nr])
 			bstr := base64.URLEncoding.EncodeToString(buf[0:nr]);
 			url := DK_FDFS_URL+"/wstream?path="+h.path+"&offset="+strconv.FormatInt(offset,10)+"&bstr="+bstr
-			fmt.Println(url);
+			//fmt.Println(url);
 			resp, eg :=http.Get(url)
 			if eg != nil {
 				err = eg
@@ -199,7 +199,7 @@ func (h *Fdfshandle)Write(reader io.Reader) (nn int64, err error){
 			if nw > 0 {
 				nn += int64(nw)
 				offset+=int64(nw)
-				fmt.Println(h.path+"======================>"+strconv.FormatInt(nn,10)+"   nr="+strconv.Itoa(nr));
+				//fmt.Println(h.path+"======================>"+strconv.FormatInt(nn,10)+"   nr="+strconv.Itoa(nr));
 
 			}
 			if nr != nw {
@@ -221,7 +221,7 @@ func (h *Fdfshandle)Write(reader io.Reader) (nn int64, err error){
 
 func (h *Fdfshandle) Stat()(info storagedriver.FileInfo,err error){
 	url := DK_FDFS_URL+"/finfo?path="+h.path
-	fmt.Println(url);
+	//fmt.Println(url);
 	resp, eg :=http.Get(url)
 	if eg != nil {
 		err = eg
@@ -262,7 +262,7 @@ func (h *Fdfshandle) Stat()(info storagedriver.FileInfo,err error){
 
 func (h *Fdfshandle) List()(ss []string,err error){
 	url := DK_FDFS_URL+"/list?path="+h.path
-	fmt.Println(url);
+	//fmt.Println(url);
 	resp, eg :=http.Get(url)
 	if eg != nil {
 		err = eg
@@ -281,7 +281,7 @@ func (h *Fdfshandle) List()(ss []string,err error){
 
 func (h *Fdfshandle) Move(topath string)(err error){
 	url := DK_FDFS_URL+"/move?srcpath="+h.path+"&topath="+topath
-	fmt.Println(url);
+	//fmt.Println(url);
 	resp, eg :=http.Get(url)
 	if eg != nil {
 		err = eg
@@ -303,7 +303,7 @@ func (h *Fdfshandle) Move(topath string)(err error){
 
 func (h *Fdfshandle) Delete()(err error){
 	url := DK_FDFS_URL+"/delete?path="+h.path
-	fmt.Println(url);
+	//fmt.Println(url);
 	resp, eg :=http.Get(url)
 	if eg != nil {
 		err = eg

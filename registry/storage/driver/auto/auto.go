@@ -13,7 +13,7 @@ import (
 	"github.com/docker/distribution/registry/storage/driver/factory"
 	"bytes"
 	"fmt"
-	"strconv"
+	//"strconv"
 )
 
 const driverName = "auto"
@@ -31,7 +31,7 @@ const listMax = 1000
 
 
 func init() {
-	fmt.Println("-----------auto  init---------------")
+	fmt.Println("-----------autohome  fastdfs init---------------")
 	factory.Register(driverName, &autoDriverFactory{})
 }
 
@@ -122,7 +122,7 @@ func (d *driver) ReadStream(ctx context.Context, path string, offset int64) (io.
 	//判断offset是否超出范围
 	c,err := fdfs.Checkoffset();
 	if err!=nil || !c {
-		fmt.Println("------->"+path+" offset="+strconv.FormatInt(offset,10)+"  offset wrong")
+		//fmt.Println("------->"+path+" offset="+strconv.FormatInt(offset,10)+"  offset wrong")
 		return nil,err
 	}
 	return fdfs,nil
